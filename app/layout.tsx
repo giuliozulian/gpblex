@@ -1,11 +1,10 @@
 import type {Metadata} from "next";
-import {Inter as FontSans} from "next/font/google";
+import {Space_Grotesk as FontSans} from "next/font/google";
 import {ThemeProvider} from "@/components/theme/theme-provider";
 import {Analytics} from "@vercel/analytics/react";
 
 import "./globals.css";
 
-import {Button} from "@/components/ui/button";
 import {MobileNav} from "@/components/nav/mobile-nav";
 import {ThemeToggle} from "@/components/theme/theme-toggle";
 import {Main} from "@/components/craft";
@@ -21,6 +20,7 @@ import Link from "next/link";
 import {cn} from "@/lib/utils";
 import ApolloWrapper from "@/components/apolloWrapper";
 import SimpleMenu from "@/components/nav/navigation";
+import {NavProps} from "@/lib/types";
 
 const fontSans = FontSans({
     subsets: ["latin"],

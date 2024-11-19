@@ -66,7 +66,6 @@ export default async function Page() {
             </Section>
         );
     } catch (error) {
-        console.error('Error:', error);
         return (
             <Section>
                 <Container>

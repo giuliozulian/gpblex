@@ -11,8 +11,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const page = await getPageBySlug(params.slug);
   return {
-    title: page.title.rendered,
-    description: page.excerpt.rendered,
+    title: page?.title.rendered,
+    description: page?.excerpt.rendered,
   };
 }
 
@@ -23,8 +23,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     <Section>
       <Container>
         <BackButton />
-        <h1 className="pt-12">{page.title.rendered}</h1>
-        <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
+        <h1 className="pt-12">{page?.title.rendered}</h1>
       </Container>
     </Section>
   );
