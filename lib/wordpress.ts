@@ -4,14 +4,7 @@
 
 import querystring from 'query-string'
 
-import {
-  Post,
-  Category,
-  Tag,
-  Page,
-  Author,
-  FeaturedMedia,
-} from "./wordpress.d";
+import {Author, Category, FeaturedMedia, Page, Post, Tag,} from "./wordpress.d";
 
 // WordPress Config
 
@@ -19,7 +12,7 @@ const baseUrl = process.env.WORDPRESS_URL;
 
 function getUrl(path: string, query?: Record<string, any>) {
     const params = query ? querystring.stringify(query) : null
-  
+
     return `${baseUrl}${path}${params ? `?${params}` : ""}`
 }
 
@@ -29,7 +22,7 @@ export async function getAllPosts(filterParams?: {
   author?: string;
   tag?: string;
   category?: string;
-}): Promise<Post[]> {  
+}): Promise<Post[]> {
   const url = getUrl("/wp-json/wp/v2/posts", { author: filterParams?.author, tags: filterParams?.tag, categories: filterParams?.category });
   const response = await fetch(url);
   const posts: Post[] = await response.json();
@@ -195,4 +188,47 @@ export async function getFeaturedMediaById(id: number): Promise<FeaturedMedia> {
   const response = await fetch(url);
   const featuredMedia: FeaturedMedia = await response.json();
   return featuredMedia;
+}
+
+
+export async function getFrontPage() {
+  try {
+    const response = await fetch(`${process.env.WORDPRESS_URL}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
+          query FrontPage {
+            nodeByUri(uri: "/") {
+              __typename
+              ... on ContentType {
+                id
+                name
+              }
+              ... on Page {
+                id
+                title
+                content
+                featuredImage {
+                  node {
+                    sourceUrl
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        `
+      }),
+      next: { revalidate: 3600 }
+    });
+
+    const { data } = await response.json();
+    return data?.nodeByUri;
+  } catch (error) {
+    console.error('Error fetching front page:', error);
+    throw error;
+  }
 }
