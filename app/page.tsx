@@ -16,7 +16,6 @@ export default async function Page() {
             );
         }
 
-        // Se è una Page
         if (node.__typename === 'Page') {
             return (
                 <Section>
@@ -48,7 +47,6 @@ export default async function Page() {
             );
         }
 
-        // Se è un ContentType
         if (node.__typename === 'ContentType') {
             return (
                 <Section>
