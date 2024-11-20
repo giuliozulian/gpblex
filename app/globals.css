@@ -54,7 +54,8 @@
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
 
-    --accent: 0 0% 14.9%;
+    --accent: 61, 85%, 49%;
+    --paragraph: 100% 100% 100%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;

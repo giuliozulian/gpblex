@@ -5,7 +5,13 @@
 import querystring from 'query-string'
 
 import {Author, Category, FeaturedMedia, Page, Post, Tag,} from "./wordpress.d";
-import {GET_ALL_TEAM_MEMBERS, GET_TEAM_MEMBER, GET_TEAM_MEMBER_BY_SLUG} from "@/lib/queries";
+import {
+    GET_ALL_TEAM_MEMBERS,
+    GET_TEAM_MEMBER_BY_SLUG,
+    SEARCH_CONTENT_QUERY,
+} from "@/lib/queries";
+import {CACHE_TIMEOUT} from "@/lib/utils/utils";
+import {gql} from "@apollo/client";
 
 // WordPress Config
 
@@ -227,7 +233,7 @@ export async function getFrontPage() {
           }
         `
             }),
-            next: {revalidate: 3600}
+            next: {revalidate: CACHE_TIMEOUT}
         });
 
         const {data} = await response.json();
@@ -240,7 +246,7 @@ export async function getFrontPage() {
 
 export async function getTeamMembers() {
     try {
-        const response = await fetch(`${process.env.WORDPRESS_URL}/graphql`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -248,12 +254,10 @@ export async function getTeamMembers() {
             body: JSON.stringify({
                 query: GET_ALL_TEAM_MEMBERS
             }),
-            next: {revalidate: 3600}
+            next: {revalidate: CACHE_TIMEOUT}
         });
 
         const {data} = await response.json();
-
-        console.log('GraphQL Response:', data);
 
         return data?.teams?.nodes || [];
     } catch (error) {
@@ -264,7 +268,7 @@ export async function getTeamMembers() {
 
 export async function getTeamMemberBySlug(slug: string) {
     try {
-        const response = await fetch(`${process.env.WORDPRESS_URL}/graphql`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -275,7 +279,7 @@ export async function getTeamMemberBySlug(slug: string) {
                     slug: slug
                 }
             }),
-            next: { revalidate: 3600 }
+            next: { revalidate: CACHE_TIMEOUT }
         });
 
         const { data } = await response.json();
@@ -283,5 +287,47 @@ export async function getTeamMemberBySlug(slug: string) {
     } catch (error) {
         console.error('Error:', error);
         return null;
+    }
+}
+
+export async function getSearchResults(term: string) {
+    console.clear()
+    console.log('term', term)
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: SEARCH_CONTENT_QUERY,
+                variables: {
+                    searchTerm: term
+                }
+            }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data } = await response.json();
+        console.log('Raw data:', data);
+
+        const allResults = [
+            ...(data?.posts?.nodes || []),
+            ...(data?.pages?.nodes || []),
+            ...(data?.teams?.nodes || []),
+            ...(data?.practiceAreas?.nodes || [])
+        ];
+
+        console.log('Combined results:', allResults);
+
+        return allResults;
+
+    } catch (error) {
+        console.error('Error:', error);
+        return [];
     }
 }

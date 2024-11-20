@@ -17,10 +17,11 @@ import Logo from "@/public/logo.svg";
 import Image from "next/image";
 import Link from "next/link";
 
-import {cn} from "@/lib/utils";
+import {cn} from "@/lib/utils/utils";
 import ApolloWrapper from "@/components/apolloWrapper";
 import SimpleMenu from "@/components/nav/navigation";
-import {NavProps} from "@/lib/types";
+import {NavProps} from "@/lib/types/menu";
+import Search from "@/components/search/search";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -97,10 +98,8 @@ const Nav = async ({className, children, id}: NavProps) => {
                 </Link>
                 {children}
                 <div className="flex items-center gap-2">
-                    <div className="mx-2 hidden md:flex">
-
-                    </div>
                     <SimpleMenu/>
+                    <Search/>
                     <MobileNav/>
                 </div>
             </div>

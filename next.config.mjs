@@ -1,12 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ['localhost'],
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: process.env.WORDPRESS_HOSTNAME,
-        port: "",
-        pathname: "/**",
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '10094',
+        pathname: '/wp-content/uploads/**',
       },
     ],
   },

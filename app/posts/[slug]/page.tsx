@@ -8,7 +8,7 @@ import {
 import { Section, Container, Article, Main } from "@/components/craft";
 import { Metadata } from "next";
 import { badgeVariants } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";

@@ -5,9 +5,7 @@ import Link from "next/link";
 import {GET_PRIMARY_MENU} from "@/lib/queries";
 
 export default function SimpleMenu() {
-    const { data, loading, error } = useQuery(GET_PRIMARY_MENU);
-
-    if (loading) return <div>Loading...</div>;
+    const { data } = useQuery(GET_PRIMARY_MENU);
 
     const menuItems = data?.menus?.nodes[0]?.menuItems?.nodes || [];
     const firstLevelItems = menuItems.filter((item: any) => !item.parentId);

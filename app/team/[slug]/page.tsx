@@ -1,4 +1,3 @@
-// app/team/[slug]/page.tsx
 import {Section, Container} from "@/components/craft";
 import Image from 'next/image';
 import Link from 'next/link';
@@ -23,10 +22,10 @@ export default async function TeamMemberPage({
 
     return (
         <Section>
-            <Container>
+            <Container className="not-prose">
                 <Link
                     href="/team"
-                    className="inline-block mb-8 text-blue-600 hover:underline"
+                    className="inline-block mb-8 text-accent hover:underline"
                 >
                     ← Back to Team
                 </Link>
@@ -34,67 +33,46 @@ export default async function TeamMemberPage({
                 <div className="grid md:grid-cols-2 gap-12">
                     <div>
                         {member.featuredImage && (
-                            <img
+                            <Image
                                 src={member.featuredImage.node.sourceUrl}
                                 alt={member.featuredImage.node.altText || member.title}
                                 width={600}
                                 height={800}
-                                className="rounded-lg object-cover"
+                                className="rounded-lg mt-0 object-cover"
                             />
                         )}
                     </div>
 
-                    {/* Right Column - Info */}
                     <div>
-                        <h1 className="text-4xl font-bold mb-4">{member.title}</h1>
+                        <h1 className="text-4xl font-bold mb-8">{member.title}</h1>
+
+                        <article className="text-lg">
+
 
                         {member.teamFields?.role && (
-                            <h2 className="text-xl text-gray-600 mb-6">
-                                {member.teamFields.role}
+                            <h2 className="mb-2">
+                                <span className="text-foreground">Ruolo</span>: <span>{member.teamFields.role}</span>
                             </h2>
                         )}
 
-                        <div className="grid gap-6 mb-8">
-                            {member.teamFields?.office && (
-                                <div>
-                                    <h3 className="font-semibold text-gray-700">Office</h3>
-                                    <p>{member.teamFields.office}</p>
-                                </div>
-                            )}
+                        {member.teamFields?.office && (
+                            <h2 className="mb-2">
+                                <span className="text-foreground">Sede</span>: <span>{member.teamFields.office}</span>
+                            </h2>
+                        )}
 
-                            {member.teamFields?.languages && (
-                                <div>
-                                    <h3 className="font-semibold text-gray-700">Languages</h3>
-                                    <p>{member.teamFields.languages}</p>
-                                </div>
-                            )}
+                        {member.teamFields?.languages && (
+                            <h2 className="mb-2">
+                                <span className="text-foreground">Lingue</span>: <span>{member.teamFields.languages}</span>
+                            </h2>
+                        )}
 
-                            {member.teamFields?.habilitation && (
-                                <div>
-                                    <h3 className="font-semibold text-gray-700">Habilitation</h3>
-                                    <p>{member.teamFields.habilitation}</p>
-                                </div>
-                            )}
-
-                            {member.teamFields?.education && (
-                                <div>
-                                    <h3 className="font-semibold text-gray-700">Education</h3>
-                                    <p>{member.teamFields.education}</p>
-                                </div>
-                            )}
-
-                            {member.teamFields?.email && (
-                                <div>
-                                    <h3 className="font-semibold text-gray-700">Contact</h3>
-                                    <a
-                                        href={`mailto:${member.teamFields.email}`}
-                                        className="text-blue-600 hover:underline"
-                                    >
-                                        {member.teamFields.email}
-                                    </a>
-                                </div>
-                            )}
-                        </div>
+                        {member.teamFields?.education && (
+                            <h2 className="mb-2">
+                                <span className="text-foreground">Formazione</span>: <span>{member.teamFields.education}</span>
+                            </h2>
+                        )}
+                        </article>
 
                         {/* Practice Areas */}
                         {member.teamFields?.practiceAreas && member.teamFields.practiceAreas.length > 0 && (
