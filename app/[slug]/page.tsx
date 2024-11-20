@@ -13,13 +13,14 @@ export async function generateMetadata({
   const page = await getPageBySlug(params.slug);
   return {
     title: page?.title.rendered,
-    description: page?.excerpt.rendered,
+    description: page?.excerpt?.rendered || page?.excerpt, // fallback in case excerpt is just a string
   };
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const page = await getPageBySlug(params.slug);
 
+  console.log(page)
   if(!page){
     return <NotFound/>
   }
@@ -28,7 +29,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     <Section>
       <Container>
         <BackButton />
-        <h1 className="pt-12">{page?.title.rendered}</h1>
+        <h1 className="pt-12">{page?.title}</h1>
       </Container>
     </Section>
   );
