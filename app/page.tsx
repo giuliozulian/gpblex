@@ -1,5 +1,6 @@
 import { getFrontPage } from '@/lib/wordpress';
 import { Section, Container } from "@/components/craft";
+import Image from "next/image";
 
 export default async function Page() {
     try {
@@ -26,7 +27,9 @@ export default async function Page() {
 
                         {node.featuredImage && (
                             <div className="mb-8">
-                                <img
+                                <Image
+                                    width={400}
+                                    height={400}
                                     src={node.featuredImage.node.sourceUrl}
                                     alt={node.featuredImage.node.altText || ''}
                                     className="w-full h-auto rounded-lg"
