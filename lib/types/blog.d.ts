@@ -34,6 +34,7 @@ export interface Post {
     slug: string;
     uri: string;
     excerpt: string;
+    modified?: string,
     featuredImage: FeaturedImage;
     categories: {
         nodes: Category[];
