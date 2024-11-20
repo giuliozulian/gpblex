@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/wordpress";
 import { siteConfig } from "@/site.config";
+import {Post} from "@/lib/types/blog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getAllPosts();
@@ -44,9 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const postUrls: MetadataRoute.Sitemap = posts.map((post) => ({
+  const postUrls: MetadataRoute.Sitemap = posts.map((post: Post) => ({
     url: `${siteConfig.site_domain}/posts/${post.slug}`,
-    lastModified: new Date(post.modified),
+    lastModified: typeof post.modified === 'string' ? new Date(post.modified) : post.modified,
     changeFrequency: "weekly",
     priority: 0.5,
   }));
