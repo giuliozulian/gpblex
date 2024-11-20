@@ -3,6 +3,7 @@ import { Section, Container, Main } from "@/components/craft";
 import { Metadata } from "next";
 
 import BackButton from "@/components/back";
+import NotFound from "@/app/not-found";
 
 export async function generateMetadata({
   params,
@@ -18,6 +19,10 @@ export async function generateMetadata({
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const page = await getPageBySlug(params.slug);
+
+  if(!page){
+    return <NotFound/>
+  }
 
   return (
     <Section>

@@ -4,14 +4,20 @@
 
 import querystring from 'query-string'
 
-import {Author, Category, FeaturedMedia, Page, Post, Tag,} from "./wordpress.d";
+import {Category, FeaturedMedia, Page, Tag,} from "./wordpress.d";
 import {
     GET_ALL_TEAM_MEMBERS,
     GET_TEAM_MEMBER_BY_SLUG,
     SEARCH_CONTENT_QUERY,
 } from "@/lib/queries";
 import {CACHE_TIMEOUT} from "@/lib/utils/utils";
-import {gql} from "@apollo/client";
+import {
+    GET_ALL_CATEGORIES_QUERY,
+    GET_ALL_POSTS_QUERY,
+    GET_ALL_TAGS_QUERY,
+    GET_CATEGORY_BY_ID, GET_POST_BY_SLUG
+} from "@/lib/queries/blog";
+import {Post} from "@/lib/types/blog";
 
 // WordPress Config
 
@@ -23,21 +29,41 @@ function getUrl(path: string, query?: Record<string, any>) {
     return `${baseUrl}${path}${params ? `?${params}` : ""}`
 }
 
-// WordPress Functions
-
 export async function getAllPosts(filterParams?: {
-    author?: string;
     tag?: string;
     category?: string;
-}): Promise<Post[]> {
-    const url = getUrl("/wp-json/wp/v2/posts", {
-        author: filterParams?.author,
-        tags: filterParams?.tag,
-        categories: filterParams?.category
-    });
-    const response = await fetch(url);
-    const posts: Post[] = await response.json();
-    return posts;
+}) {
+    try {
+        // Se non sono specificati tag o category, passa null
+        // GraphQL ignora questi filtri quando sono null
+        const variables = {
+            categoryId: filterParams?.category ? [filterParams.category] : null,
+            tagId: filterParams?.tag ? [filterParams.tag] : null
+        };
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: GET_ALL_POSTS_QUERY,
+                variables
+            }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data } = await response.json();
+        return data?.posts?.nodes || [];
+
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        return [];
+    }
 }
 
 export async function getPostById(id: number): Promise<Post> {
@@ -47,25 +73,88 @@ export async function getPostById(id: number): Promise<Post> {
     return post;
 }
 
-export async function getPostBySlug(slug: string): Promise<Post> {
-    const url = getUrl("/wp-json/wp/v2/posts", {slug});
-    const response = await fetch(url);
-    const post: Post[] = await response.json();
-    return post[0];
+export async function getPostBySlug(slug: string) {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: GET_POST_BY_SLUG,
+                variables: {
+                    slug: slug
+                }
+            }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data } = await response.json();
+        return data.post;
+    } catch (error) {
+        console.error('Error fetching post:', error);
+        return null;
+    }
 }
 
-export async function getAllCategories(): Promise<Category[]> {
-    const url = getUrl("/wp-json/wp/v2/categories");
-    const response = await fetch(url);
-    const categories: Category[] = await response.json();
-    return categories;
+
+export async function getAllCategories() {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: GET_ALL_CATEGORIES_QUERY
+            }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data } = await response.json();
+        return data?.categories?.nodes || [];
+
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+    }
 }
 
-export async function getCategoryById(id: number): Promise<Category> {
-    const url = getUrl(`/wp-json/wp/v2/categories/${id}`);
-    const response = await fetch(url);
-    const category: Category = await response.json();
-    return category;
+export async function getCategoryById(id: string): Promise<Category | null> {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: GET_CATEGORY_BY_ID,
+                variables: {
+                    id: id
+                }
+            }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data } = await response.json();
+        return data?.category || null;
+
+    } catch (error) {
+        console.error('Error fetching category:', error);
+        return null;
+    }
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category> {
@@ -91,13 +180,6 @@ export async function getPostsByTag(tagId: number): Promise<Post[]> {
 
 export async function getTagsByPost(postId: number): Promise<Tag[]> {
     const url = getUrl("/wp-json/wp/v2/tags", {post: postId});
-    const response = await fetch(url);
-    const tags: Tag[] = await response.json();
-    return tags;
-}
-
-export async function getAllTags(): Promise<Tag[]> {
-    const url = getUrl("/wp-json/wp/v2/tags");
     const response = await fetch(url);
     const tags: Tag[] = await response.json();
     return tags;
@@ -136,44 +218,6 @@ export async function getPageBySlug(slug: string): Promise<Page> {
     const response = await fetch(url);
     const page: Page[] = await response.json();
     return page[0];
-}
-
-export async function getAllAuthors(): Promise<Author[]> {
-    const url = getUrl("/wp-json/wp/v2/users");
-    const response = await fetch(url);
-    const authors: Author[] = await response.json();
-    return authors;
-}
-
-export async function getAuthorById(id: number): Promise<Author> {
-    const url = getUrl(`/wp-json/wp/v2/users/${id}`);
-    const response = await fetch(url);
-    const author: Author = await response.json();
-    return author;
-}
-
-export async function getAuthorBySlug(slug: string): Promise<Author> {
-    const url = getUrl("/wp-json/wp/v2/users", {slug});
-    const response = await fetch(url);
-    const author: Author[] = await response.json();
-    return author[0];
-}
-
-export async function getPostsByAuthor(authorId: number): Promise<Post[]> {
-    const url = getUrl("/wp-json/wp/v2/posts", {author: authorId});
-    const response = await fetch(url);
-    const posts: Post[] = await response.json();
-    return posts;
-}
-
-export async function getPostsByAuthorSlug(
-    authorSlug: string
-): Promise<Post[]> {
-    const author = await getAuthorBySlug(authorSlug);
-    const url = getUrl("/wp-json/wp/v2/posts", {author: author.id});
-    const response = await fetch(url);
-    const posts: Post[] = await response.json();
-    return posts;
 }
 
 export async function getPostsByCategorySlug(
@@ -291,8 +335,7 @@ export async function getTeamMemberBySlug(slug: string) {
 }
 
 export async function getSearchResults(term: string) {
-    console.clear()
-    console.log('term', term)
+
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
             method: 'POST',
@@ -313,7 +356,6 @@ export async function getSearchResults(term: string) {
         }
 
         const { data } = await response.json();
-        console.log('Raw data:', data);
 
         const allResults = [
             ...(data?.posts?.nodes || []),
@@ -322,12 +364,36 @@ export async function getSearchResults(term: string) {
             ...(data?.practiceAreas?.nodes || [])
         ];
 
-        console.log('Combined results:', allResults);
-
         return allResults;
 
     } catch (error) {
         console.error('Error:', error);
+        return [];
+    }
+}
+
+export async function getAllTags() {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: GET_ALL_TAGS_QUERY
+            }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data } = await response.json();
+        return data?.tags?.nodes || [];
+
+    } catch (error) {
+        console.error('Error fetching tags:', error);
         return [];
     }
 }

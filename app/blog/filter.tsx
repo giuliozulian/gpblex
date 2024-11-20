@@ -10,11 +10,6 @@ import {
 } from "@/components/ui/select"; // Ensure this is the correct import path
 import { Button } from "@/components/ui/button"; // Add this import for the Button component
 
-interface Author {
-  id: number;
-  name: string;
-}
-
 interface Tag {
   id: number;
   name: string;
@@ -26,19 +21,15 @@ interface Category {
 }
 
 interface FilterPostsProps {
-  authors: Author[];
   tags: Tag[];
   categories: Category[];
-  selectedAuthor?: string;
   selectedTag?: string;
   selectedCategory?: string;
 }
 
 export default function FilterPosts({
-  authors,
   tags,
   categories,
-  selectedAuthor,
   selectedTag,
   selectedCategory,
 }: FilterPostsProps) {
@@ -51,11 +42,11 @@ export default function FilterPosts({
     } else {
       newParams.set(type, value);
     }
-    router.push(`/posts?${newParams.toString()}`);
+    router.push(`/blog?${newParams.toString()}`);
   };
 
   const handleResetFilters = () => {
-    router.push("/posts");
+    router.push("/blog");
   };
 
   return (
@@ -89,23 +80,6 @@ export default function FilterPosts({
           {categories.map((category) => (
             <SelectItem key={category.id} value={category.id.toString()}>
               {category.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={selectedAuthor || "all"}
-        onValueChange={(value) => handleFilterChange("author", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="All Authors" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Authors</SelectItem>
-          {authors.map((author) => (
-            <SelectItem key={author.id} value={author.id.toString()}>
-              {author.name}
             </SelectItem>
           ))}
         </SelectContent>
