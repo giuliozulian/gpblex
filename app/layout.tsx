@@ -11,6 +11,7 @@ import {Main} from "@/components/craft";
 import {mainMenu, contentMenu} from "@/menu.config";
 import {Section, Container} from "@/components/craft";
 import Balancer from "react-wrap-balancer";
+import NextTopLoader from 'nextjs-toploader';
 
 import Logo from "@/public/logo.svg";
 
@@ -35,8 +36,8 @@ export const metadata: Metadata = {
     metadataBase: new URL("https://wp.9d8.dev"),
 };
 
-// Revalidate content every hour
-export const revalidate = 3600;
+import { twConfig } from '@/lib/tw-config';
+const accentColor = twConfig.theme.colors.accent;
 
 export default function RootLayout({
                                        children,
@@ -57,6 +58,15 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
             >
+                <NextTopLoader
+                    color={accentColor.DEFAULT}
+                    height={3}
+                    crawl={true}
+                    showSpinner={true}
+                    easing="ease"
+                    speed={200}
+                    shadow="0 0 10px #2299DD,0 0 5px #2299DD"
+                />
                 <Nav />
                 <Main>{children}</Main>
                 <Footer/>
